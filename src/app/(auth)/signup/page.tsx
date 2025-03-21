@@ -25,7 +25,7 @@ interface SignUpFormData {
   
 	const registerMutation = api.user.registerUser.useMutation({
 	  onSuccess: () => {
-		router.push("/signin?registered=true");
+		router.push("/?registered=true");
 	  },
 	  onError: (error) => {
 		setError("root", { message: error.message }); // Handling API error

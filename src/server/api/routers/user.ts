@@ -114,6 +114,34 @@ export const userRouter = createTRPCRouter({
         };
     }),
 
+
+logoutSafe: publicProcedure.mutation(async () => {
+    try {
+      const sessionCookie = (await cookies()).get(lucia.sessionCookieName);
+      
+      if (sessionCookie) {
+        const { session } = await lucia.validateSession(sessionCookie.value);
+        if (session) {
+          await lucia.invalidateSession(session.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  
+    // Always clear the session cookie
+    const sessionCookie = lucia.createBlankSessionCookie();
+    (await cookies()).set(
+      sessionCookie.name,
+      sessionCookie.value,    
+      sessionCookie.attributes,
+    );
+  
+    return { success: true };
+  }),
+
+  
+
     logout: protectedProcedure.mutation(async ({ ctx }) => {
         await lucia.invalidateSession(ctx.session.id);
     
@@ -121,7 +149,7 @@ export const userRouter = createTRPCRouter({
     
         (await cookies()).set(
             sessionCookie.name,
-            sessionCookie.value,
+            sessionCookie.value,    
             sessionCookie.attributes,
         );
     
